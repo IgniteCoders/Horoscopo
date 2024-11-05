@@ -16,11 +16,16 @@ import com.example.horoscopo.utils.SessionManager
 
 class DetailActivity : AppCompatActivity() {
 
+    // El horóscopo que queremos visualizar
     lateinit var horoscope: Horoscope
+
+    // Si el horóscopo es favorito o no
     var isFavorite = false
 
+    // La opción del menu de favorito para poder cambiar el icono
     lateinit var favoriteMenuItem: MenuItem
 
+    // El objeto que gestiona la sesión para poder guardar el favorito
     lateinit var session: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,18 +33,25 @@ class DetailActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_detail)
 
+        // Obtenemos el parámetro del horóscopo que queremos visualziar
         val id = intent.getStringExtra("horoscope_id")!!
 
+        // Buscamos el horóscopo
         horoscope = HoroscopeProvider.findById(id)
 
+        // Modificamos el ActionBar para mostrar título y subtítulo
         supportActionBar?.title = getString(horoscope.name)
         supportActionBar?.subtitle = getString(horoscope.dates)
+        // Habilitamos el boton de volver atras en el ActionBar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // Instanciamos el objeto de la sesión
         session = SessionManager(this)
 
+        // Revisamos si el horóscopo es favorito
         isFavorite = session.isFavorite(horoscope.id)
 
+        // Pruebas
         findViewById<TextView>(R.id.tv).setText(horoscope.name)
         findViewById<ImageView>(R.id.iv).setImageResource(horoscope.image)
         findViewById<Button>(R.id.b).setOnClickListener {
@@ -47,18 +59,25 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    // Función para mostrar el menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_detail_activity, menu)
+
+        // Buscamos la opción del menu de favorito
         favoriteMenuItem = menu?.findItem(R.id.menu_favorite)!!
+
+        // Cambiamos el icono en función de si es favorito o no
         setFavoriteIcon()
+
         return true
     }
 
+    // Funcionar para capturar que opcion del menu se ha clickeado
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                println("Menu home")
-                finish()
+                // Opcion volver atras
+                finish() // Cerramos el Activity
                 return true
             }
             R.id.menu_favorite -> {
