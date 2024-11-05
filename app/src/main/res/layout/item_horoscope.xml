@@ -8,7 +8,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="16dp">
 
         <ImageView
             android:id="@+id/symbolImageView"
@@ -17,8 +19,9 @@
             android:src="@drawable/aries_icon"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="96dp"
+            android:layout_weight="1"
             android:orientation="vertical"
             android:paddingVertical="8dp"
             android:paddingHorizontal="16dp">
@@ -39,6 +42,14 @@
                 android:textSize="24dp"/>
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/favoriteImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_favorite_selected"
+            app:tint="@color/favorite"
+            android:layout_gravity="center_vertical"/>
     </LinearLayout>
 
     <com.google.android.material.divider.MaterialDivider

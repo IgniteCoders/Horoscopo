@@ -17,6 +17,8 @@ class ListActivity : AppCompatActivity() {
 
     lateinit var recyclerView: RecyclerView
 
+    lateinit var adapter: HoroscopeAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -26,14 +28,17 @@ class ListActivity : AppCompatActivity() {
 
         horoscopeList = HoroscopeProvider.findAll()
 
-        val adapter = HoroscopeAdapter(horoscopeList) { position ->
+        adapter = HoroscopeAdapter(horoscopeList) { position ->
             val horoscope = horoscopeList[position]
             navigateToDetail(horoscope)
         }
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+    }
 
-
+    override fun onResume() {
+        super.onResume()
+        adapter.notifyDataSetChanged()
     }
 
     private fun navigateToDetail(horoscope: Horoscope) {
