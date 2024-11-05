@@ -11,10 +11,17 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.horoscopo.R
 import com.example.horoscopo.data.Horoscope
 import com.example.horoscopo.data.HoroscopeProvider
+import com.example.horoscopo.utils.SessionManager
+
 
 class DetailActivity : AppCompatActivity() {
 
     lateinit var horoscope: Horoscope
+    var isFavorite = false
+
+    lateinit var favoriteMenuItem: MenuItem
+
+    lateinit var session: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +36,10 @@ class DetailActivity : AppCompatActivity() {
         supportActionBar?.subtitle = getString(horoscope.dates)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        session = SessionManager(this)
+
+        isFavorite = session.isFavorite(horoscope.id)
+
         findViewById<TextView>(R.id.tv).setText(horoscope.name)
         findViewById<ImageView>(R.id.iv).setImageResource(horoscope.image)
         findViewById<Button>(R.id.b).setOnClickListener {
@@ -38,6 +49,8 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_detail_activity, menu)
+        favoriteMenuItem = menu?.findItem(R.id.menu_favorite)!!
+        setFavoriteIcon()
         return true
     }
 
@@ -49,7 +62,13 @@ class DetailActivity : AppCompatActivity() {
                 return true
             }
             R.id.menu_favorite -> {
-                println("Menu favorito")
+                if (isFavorite) {
+                    session.setFavorite("")
+                } else {
+                    session.setFavorite(horoscope.id)
+                }
+                isFavorite = !isFavorite
+                setFavoriteIcon()
                 return true
             }
             R.id.menu_share -> {
@@ -59,6 +78,14 @@ class DetailActivity : AppCompatActivity() {
             else -> {
                 return super.onOptionsItemSelected(item)
             }
+        }
+    }
+
+    fun setFavoriteIcon() {
+        if(isFavorite) {
+            favoriteMenuItem.setIcon(R.drawable.ic_favorite_selected)
+        } else {
+            favoriteMenuItem.setIcon(R.drawable.ic_favorite)
         }
     }
 

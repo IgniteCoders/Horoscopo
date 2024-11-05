@@ -6,6 +6,7 @@
         android:title="@string/menu_favorite"
         android:icon="@drawable/ic_favorite"
         app:showAsAction="always"
+        app:iconTint="@color/favorite"
         />
     <item
         android:id="@+id/menu_share"
