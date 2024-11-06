@@ -2,14 +2,17 @@ package com.example.horoscopo.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.horoscopo.R
 import com.example.horoscopo.adapters.HoroscopeAdapter
 import com.example.horoscopo.data.Horoscope
 import com.example.horoscopo.data.HoroscopeProvider
+
 
 class ListActivity : AppCompatActivity() {
 
@@ -49,6 +52,41 @@ class ListActivity : AppCompatActivity() {
 
         // Refrescamos la lista notificando al adapter de que los datos han cambiado
         adapter.notifyDataSetChanged() // Esto lo hacemos para que refleje el favorito cuando cambie
+    }
+
+    // Función para mostrar el menú
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_list_activity, menu)
+
+        // Busco la opción de busqueda en el menú
+        val searchMenuItem = menu?.findItem(R.id.menu_search)!!
+
+        // Obtengo la clase del ActionView asociada a esa opción del menú
+        val searchView = searchMenuItem.actionView as SearchView
+
+        // Le asigno el listener a la busqueda
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            // función para cuando se pulsa enter
+            override fun onQueryTextSubmit(query: String): Boolean {
+                return false
+            }
+
+            // función para cada vez que cambia el texto
+            override fun onQueryTextChange(newText: String): Boolean {
+                // Filtro la lista en base al nombre y las fechas del horóscopo
+                horoscopeList = HoroscopeProvider.findAll().filter {
+                    getString(it.name).contains(newText, true) ||
+                    getString(it.dates).contains(newText, true)
+                }
+
+                // Le paso la nueva lista al adapter
+                adapter.updateItems(horoscopeList)
+                return true
+            }
+        })
+
+        return true
     }
 
     // Navegar a DetailActivity pasandole el id del horóscopo seleccionado

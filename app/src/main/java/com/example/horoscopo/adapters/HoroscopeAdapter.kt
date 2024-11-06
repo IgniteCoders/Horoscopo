@@ -11,7 +11,7 @@ import com.example.horoscopo.data.Horoscope
 import com.example.horoscopo.utils.SessionManager
 
 
-class HoroscopeAdapter(val items: List<Horoscope>, val onItemClick: (Int) -> Unit) : RecyclerView.Adapter<HoroscopeViewHolder>() {
+class HoroscopeAdapter(var items: List<Horoscope>, val onItemClick: (Int) -> Unit) : RecyclerView.Adapter<HoroscopeViewHolder>() {
 
     // Creamos la vista de la celda
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HoroscopeViewHolder {
@@ -31,6 +31,12 @@ class HoroscopeAdapter(val items: List<Horoscope>, val onItemClick: (Int) -> Uni
         holder.itemView.setOnClickListener {
             onItemClick(position)
         }
+    }
+
+    // Función para actualziar la lista de items y refrescar las celdas
+    fun updateItems(items: List<Horoscope>) {
+        this.items = items
+        notifyDataSetChanged()
     }
 }
 
