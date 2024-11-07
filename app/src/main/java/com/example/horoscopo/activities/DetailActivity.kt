@@ -12,6 +12,16 @@ import com.example.horoscopo.R
 import com.example.horoscopo.data.Horoscope
 import com.example.horoscopo.data.HoroscopeProvider
 import com.example.horoscopo.utils.SessionManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 
 
 class DetailActivity : AppCompatActivity() {
@@ -27,6 +37,9 @@ class DetailActivity : AppCompatActivity() {
 
     // El objeto que gestiona la sesión para poder guardar el favorito
     lateinit var session: SessionManager
+
+    lateinit var symbolImageView: ImageView
+    lateinit var luckTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,12 +64,13 @@ class DetailActivity : AppCompatActivity() {
         // Revisamos si el horóscopo es favorito
         isFavorite = session.isFavorite(horoscope.id)
 
-        // Pruebas
-        findViewById<TextView>(R.id.tv).setText(horoscope.name)
-        findViewById<ImageView>(R.id.iv).setImageResource(horoscope.image)
-        findViewById<Button>(R.id.b).setOnClickListener {
-            finish()
-        }
+        // Busco los componenetes visuales
+        luckTextView = findViewById(R.id.luckTextView)
+        symbolImageView = findViewById(R.id.symbolImageView)
+
+        symbolImageView.setImageResource(horoscope.image)
+
+        getHoroscopeLuck()
     }
 
     // Función para mostrar el menu
@@ -108,11 +122,38 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if (horoscope.id == "aries") {
-            Toast.makeText(this, "No puedes volver", Toast.LENGTH_LONG).show()
-        } else {
-            super.onBackPressed()
+    fun getHoroscopeLuck() {
+        var result = "Antes de hacer la llamada"
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val url = URL("https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=${horoscope.id}&day=TODAY")
+            val con = url.openConnection() as HttpsURLConnection
+            con.requestMethod = "GET"
+            val responseCode = con.responseCode
+            println("Response Code :: $responseCode")
+            if (responseCode == HttpsURLConnection.HTTP_OK) { // connection ok
+                val jsonResponse = readStream(con.inputStream).toString()
+                result = JSONObject(jsonResponse).getJSONObject("data").getString("horoscope_data")
+            } else {
+                result = "Hubo un error en la llamada"
+            }
+            /*runOnUiThread {
+                println(result)
+            }*/
+            CoroutineScope(Dispatchers.Main).launch {
+                luckTextView.text = result
+            }
         }
+    }
+
+    private fun readStream (inputStream: InputStream) : StringBuilder {
+        val reader = BufferedReader(InputStreamReader(inputStream))
+        val response = StringBuilder()
+        var line: String?
+        while (reader.readLine().also { line = it } != null) {
+            response.append(line)
+        }
+        reader.close()
+        return response
     }
 }

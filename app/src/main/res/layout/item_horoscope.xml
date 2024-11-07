@@ -31,7 +31,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Nombre"
-                android:textSize="36dp"
+                android:textSize="36sp"
                 android:textStyle="bold"/>
 
             <TextView
@@ -39,7 +39,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Fechas"
-                android:textSize="24dp"/>
+                android:textSize="24sp"
+                android:autoSizeTextType="uniform"/>
 
         </LinearLayout>
 
