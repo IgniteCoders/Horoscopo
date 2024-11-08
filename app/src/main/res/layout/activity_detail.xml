@@ -42,7 +42,7 @@
             android:id="@+id/luckTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="Detalle del horoscopo"
+            tools:text="Consultando con las estrellas..."
             android:justificationMode="inter_word"
             android:textSize="20sp"
             android:padding="16dp" />

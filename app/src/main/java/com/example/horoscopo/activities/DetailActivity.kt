@@ -1,6 +1,8 @@
 package com.example.horoscopo.activities
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
@@ -20,6 +22,7 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.lang.Exception
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
@@ -40,6 +43,8 @@ class DetailActivity : AppCompatActivity() {
 
     lateinit var symbolImageView: ImageView
     lateinit var luckTextView: TextView
+
+    var luckResult: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,12 +110,26 @@ class DetailActivity : AppCompatActivity() {
                 return true
             }
             R.id.menu_share -> {
-                println("Menu compartir")
+                shareLuck()
                 return true
             }
             else -> {
                 return super.onOptionsItemSelected(item)
             }
+        }
+    }
+
+    private fun shareLuck() {
+        if (luckResult != null) {
+            val sendIntent = Intent()
+            sendIntent.action = Intent.ACTION_SEND
+            sendIntent.putExtra(Intent.EXTRA_TEXT, "Look to my luck today: $luckResult")
+            sendIntent.type = "text/plain"
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
+        } else {
+            // Decirle al usuario que espere
         }
     }
 
@@ -123,25 +142,34 @@ class DetailActivity : AppCompatActivity() {
     }
 
     fun getHoroscopeLuck() {
-        var result = "Antes de hacer la llamada"
-
+        // Ejecuto código en un hilo secundario
         CoroutineScope(Dispatchers.IO).launch {
-            val url = URL("https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=${horoscope.id}&day=TODAY")
-            val con = url.openConnection() as HttpsURLConnection
-            con.requestMethod = "GET"
-            val responseCode = con.responseCode
-            println("Response Code :: $responseCode")
-            if (responseCode == HttpsURLConnection.HTTP_OK) { // connection ok
-                val jsonResponse = readStream(con.inputStream).toString()
-                result = JSONObject(jsonResponse).getJSONObject("data").getString("horoscope_data")
-            } else {
-                result = "Hubo un error en la llamada"
+            try {
+                // Construyo la llamada al API
+                val url = URL("https://horoscope-app-api.vercel.app/api/v1/get-horoscope/daily?sign=${horoscope.id}&day=TODAY")
+                val con = url.openConnection() as HttpsURLConnection
+                con.requestMethod = "GET"
+                val responseCode = con.responseCode
+                println("Response Code :: $responseCode")
+                // Verifico si el resultado es correcto
+                if (responseCode == HttpsURLConnection.HTTP_OK) { // connection ok
+                    val jsonResponse = readStream(con.inputStream).toString()
+                    // Parse del JSON de la respuesta
+                    luckResult = JSONObject(jsonResponse).getJSONObject("data").getString("horoscope_data")
+                } else {
+                    luckResult = "Hubo un error en la llamada"
+                }
+            } catch (e: Exception) {
+                Log.e("API", e.stackTraceToString())
+                luckResult = "Hubo un error en la llamada"
             }
+
+            // Ejecuto código en el hilo principal para modifical la UI
             /*runOnUiThread {
-                println(result)
+                luckTextView.text = luckResult
             }*/
             CoroutineScope(Dispatchers.Main).launch {
-                luckTextView.text = result
+                luckTextView.text = luckResult
             }
         }
     }
