@@ -5,24 +5,23 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.horoscopo.R
 import com.example.horoscopo.data.Horoscope
 import com.example.horoscopo.data.HoroscopeProvider
+import com.example.horoscopo.network.HoroscopeService
 import com.example.horoscopo.utils.SessionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.lang.Exception
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
@@ -75,7 +74,7 @@ class DetailActivity : AppCompatActivity() {
 
         symbolImageView.setImageResource(horoscope.image)
 
-        getHoroscopeLuck()
+        getHoroscopeLuckWithRetrofit()
     }
 
     // Función para mostrar el menu
@@ -139,6 +138,29 @@ class DetailActivity : AppCompatActivity() {
         } else {
             favoriteMenuItem.setIcon(R.drawable.ic_favorite)
         }
+    }
+
+    fun getHoroscopeLuckWithRetrofit() {
+        val service = getRetrofit()
+
+        // Ejecuto código en un hilo secundario
+        CoroutineScope(Dispatchers.IO).launch {
+            val result = service.getHoroscopeData("monthly", horoscope.id)
+            luckResult = result.data.luck
+
+            CoroutineScope(Dispatchers.Main).launch {
+                luckTextView.text = luckResult
+            }
+        }
+    }
+
+    fun getRetrofit() : HoroscopeService {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://horoscope-app-api.vercel.app/api/v1/get-horoscope/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        return retrofit.create(HoroscopeService::class.java)
     }
 
     fun getHoroscopeLuck() {
